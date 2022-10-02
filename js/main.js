@@ -21,29 +21,34 @@ const DESCRIPTIONS = [
 
 const COUNT_PUBLICATIONS = 25;
 
-const arrayPublications = [];
+const ARRAY_PUBLICATIONS = [];
 
 const pushArray = (count) => {
   const array = [];
-  for (let i = 0; i <= count; i++) {
+  for (let i = 1; i <= count; i++) {
     array.push(i);
   }
   return array;
 };
 
 const randomNumber = (min, max) => {
+  const arrayNumbers = [min, max];
   if (min > max) {
-    [min, max] = [max, min];
+    min = arrayNumbers[1];
+    max = arrayNumbers[0];
   }
   if (min < 0 || max < 0) {
     return -1;
   }
-  return Math.round(Math.random() * (max - min) + min);
+  const lower = Math.ceil(Math.min(Math.abs(min), Math.abs(max)));
+  const upper = Math.floor(Math.max(Math.abs(min), Math.abs(max)));
+  const result = Math.random() * (upper - lower + 1) + lower;
+  return Math.floor(result);
 };
 
 const pushArraySplice = (array) => {
-  const number = array[randomNumber(0, array.lenght - 1)];
-  array.splice(array.indexOf(number, 1));
+  const number = array[randomNumber(0, array.length - 1)];
+  array.splice(array.indexOf(number), 1);
   return number;
 };
 
@@ -57,18 +62,23 @@ const commentsArray = (count) => {
       id: pushArraySplice(arrayIDComments),
       avatar: `img/avatar-${randomNumber(1, 6)}.svg`,
       message: MESSAGES[randomNumber(0, MESSAGES.length - 1)],
-      name: NAMES[randomNumber(0, NAMES - 1)]
+      name: NAMES[randomNumber(0, NAMES.length - 1)]
     };
   }
-  return commentsArray;
+  return arrayComments;
 };
 
-for (let i = 0; i < COUNT_PUBLICATIONS; i++) {
-  arrayPublications[i] = {
-    id: pushArraySplice(arrayID),
-    URL: `photos/${pushArraySplice(arrayURL)}.jpg`,
-    description: DESCRIPTIONS[randomNumber(0, DESCRIPTIONS - 1)],
-    likes: randomNumber(15, 100),
-    comments: commentsArray(2),
-  };
-}
+const addPublication = () => {
+  for (let i = 0; i < COUNT_PUBLICATIONS; i++) {
+    ARRAY_PUBLICATIONS[i] = {
+      id: pushArraySplice(arrayID),
+      URL: `photos/${pushArraySplice(arrayURL)}.jpg`,
+      description: DESCRIPTIONS[randomNumber(0, DESCRIPTIONS.length - 1)],
+      likes: randomNumber(15, 100),
+      comments: commentsArray(2),
+    };
+  }
+  return ARRAY_PUBLICATIONS;
+};
+
+addPublication();

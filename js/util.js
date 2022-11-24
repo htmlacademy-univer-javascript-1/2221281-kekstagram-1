@@ -1,4 +1,4 @@
-const randomNumber = (min, max) => {
+const getRandomNumber = (min, max) => {
   const arrayNumbers = [min, max];
   if (min > max) {
     min = arrayNumbers[1];
@@ -13,4 +13,6 @@ const randomNumber = (min, max) => {
   return Math.floor(result);
 };
 
-export {randomNumber};
+const getLineLength = (string, maxSymbols) => string.length <= maxSymbols;
+
+export {getRandomNumber, getLineLength};

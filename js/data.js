@@ -1,4 +1,4 @@
-import { randomNumber } from './util';
+import { getRandomNumber } from './util.js';
 
 const NAMES = [
   'Mike Wazowski',
@@ -25,44 +25,27 @@ const COUNT_PUBLICATIONS = 25;
 
 const arrayPublications = [];
 
-const pushArray = (count) => {
+const commentsArray = (count) => {
   const array = [];
-  for (let i = 1; i <= count; i++) {
-    array.push(i);
+  for (let i = 0; i <= count; i++) {
+    array.push({
+      id: i,
+      avatar: `img/avatar-${getRandomNumber(1, 6)}.svg`,
+      message: MESSAGES[getRandomNumber(0, MESSAGES.length - 1)],
+      name: NAMES[getRandomNumber(0, NAMES.length - 1)]
+    });
   }
   return array;
-};
-
-const pushArraySplice = (array) => {
-  const number = array[randomNumber(0, array.length - 1)];
-  array.splice(array.indexOf(number), 1);
-  return number;
-};
-
-const arrayURL = pushArray(25);
-const arrayID = pushArray(25);
-const arrayIDComments = pushArray(100);
-const commentsArray = (count) => {
-  const arrayComments = [];
-  for (let i = 0; i < count; i++) {
-    arrayComments[i] = {
-      id: pushArraySplice(arrayIDComments),
-      avatar: `img/avatar-${randomNumber(1, 6)}.svg`,
-      message: MESSAGES[randomNumber(0, MESSAGES.length - 1)],
-      name: NAMES[randomNumber(0, NAMES.length - 1)]
-    };
-  }
-  return arrayComments;
 };
 
 const addPublication = () => {
   for (let i = 0; i < COUNT_PUBLICATIONS; i++) {
     arrayPublications[i] = {
-      id: pushArraySplice(arrayID),
-      URL: `photos/${pushArraySplice(arrayURL)}.jpg`,
-      description: DESCRIPTIONS[randomNumber(0, DESCRIPTIONS.length - 1)],
-      likes: randomNumber(15, 100),
-      comments: commentsArray(2),
+      id: i,
+      URL: `photos/${i + 1}.jpg`,
+      description: DESCRIPTIONS[getRandomNumber(0, DESCRIPTIONS.length - 1)],
+      likes: getRandomNumber(15, 100),
+      comments: commentsArray(getRandomNumber(1, 20)),
     };
   }
   return arrayPublications;

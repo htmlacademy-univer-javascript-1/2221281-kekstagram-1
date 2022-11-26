@@ -8,7 +8,7 @@ const renderThumbnails = (element) => {
     picture.querySelector('.picture__img').src = photo.URL;
     picture.querySelector('.picture__likes').textContent = photo.likes;
     picture.querySelector('.picture__comments').textContent = photo.comments.length;
-    pictures.append(picture);
+    fragment.append(picture);
   });
   pictures.append(fragment);
 };

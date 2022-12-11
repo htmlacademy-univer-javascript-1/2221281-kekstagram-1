@@ -42,7 +42,7 @@ const addPublication = () => {
   for (let i = 0; i < COUNT_PUBLICATIONS; i++) {
     arrayPublications[i] = {
       id: i,
-      URL: `photos/${i + 1}.jpg`,
+      url: `photos/${i + 1}.jpg`,
       description: DESCRIPTIONS[getRandomNumber(0, DESCRIPTIONS.length - 1)],
       likes: getRandomNumber(15, 100),
       comments: commentsArray(getRandomNumber(1, 20)),

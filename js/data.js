@@ -4,6 +4,7 @@ const MAX_COMMENT_LENGTH = 140;
 const MAX_HASHTAG_COUNT = 5;
 const MAX_HASHTAG_LENGTH = 20;
 const ALLOWED_SYMBOLS = /^#[A-Za-zА-Яа-яЁё0-9]{1,19}$/;
+const MAX_COMMENT_NUMBER = 5;
 
 const ErrorMessages = {
   STARTS_WITH_HASH: 'Хэш-тег начинается с символа #',
@@ -70,4 +71,4 @@ const addPublication = () => {
 addPublication();
 
 export {arrayPublications, MAX_COMMENT_LENGTH, MAX_HASHTAG_COUNT,
-  MAX_HASHTAG_LENGTH, ErrorMessages, ALLOWED_SYMBOLS};
+  MAX_HASHTAG_LENGTH, ErrorMessages, ALLOWED_SYMBOLS, MAX_COMMENT_NUMBER};

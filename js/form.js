@@ -119,7 +119,7 @@ const closeEditor = () => {
   photoLoader.value = '';
   hashtagText.value = '';
   closeEditorButton.removeEventListener('click', onCloseEditorButton);
-  window.removeEventListener('keydown', onEscKeyDown);
+  window.removeEventListener('keydown', onEscapeKeydown);
 };
 
 const onSubmitButton = () => {
@@ -134,10 +134,10 @@ const onSubmitButton = () => {
 
 const removeEscEvent = (field) => {
   field.addEventListener('focus', () => {
-    window.removeEventListener('keydown', onEscKeyDown);
+    window.removeEventListener('keydown', onEscapeKeydown);
   });
   field.addEventListener('blur', () => {
-    window.addEventListener('keydown', onEscKeyDown);
+    window.addEventListener('keydown', onEscapeKeydown);
   });
 };
 
@@ -147,7 +147,7 @@ function onUploadPhoto() {
   hashtagText.addEventListener('input', onSubmitButton);
   descriptionText.addEventListener('input', onSubmitButton);
   closeEditorButton.addEventListener('click', onCloseEditorButton);
-  window.addEventListener('keydown', onEscKeyDown);
+  window.addEventListener('keydown', onEscapeKeydown);
   removeEscEvent(hashtagText);
   removeEscEvent(descriptionText);
 }
@@ -157,7 +157,7 @@ function onCloseEditorButton(evt) {
   closeEditor();
 }
 
-function onEscKeyDown(evt) {
+function onEscapeKeydown(evt) {
   if (isEscapeKey(evt)) {
     closeEditor();
   }

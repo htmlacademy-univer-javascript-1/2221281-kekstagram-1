@@ -1,58 +1,49 @@
 import { isEscapeKey } from './util.js';
+import { commentsHandler } from './commentsBigPicture.js';
+
 
 const pictures = document.querySelector('.pictures');
 const bigPicture = document.querySelector('.big-picture');
 const bigPicturePhoto = document.querySelector('.big-picture__img img');
 const likesCount = document.querySelector('.likes-count');
 const commentsCount = document.querySelector('.comments-count');
-const socialComments = document.querySelector('.social__comments');
 const socialCaption = document.querySelector('.social__caption');
-const socialCommentCount = document.querySelector('.social__comment-count');
-const commentsLoader = document.querySelector('.comments-loader');
 const bigPictureCancel = document.querySelector('.big-picture__cancel');
 
-const closeModal = () => {
-  bigPicture.classList.add('hidden');
-  document.body.classList.remove('modal-open');
-  document.removeEventListener('keydown', onModalEscapeKeydown);
-};
+const comments = commentsHandler();
 
-function onModalEscapeKeydown(evt){
+function onCloseModalButton(evt) {
+  evt.preventDefault();
+  closeModal();
+}
+
+function onEscapeKeydown(evt) {
   if (isEscapeKey(evt)) {
     closeModal();
   }
 }
 
-const openModal = (evt, data) => {
-  const picture = evt.target.closest('.picture');
+function closeModal() {
+  bigPicture.classList.add('hidden');
+  document.body.classList.remove('modal-open');
+  document.removeEventListener('keydown', onEscapeKeydown);
+  bigPictureCancel.removeEventListener('click', onCloseModalButton);
+  comments.removeEventListener();
+}
 
-  if (picture) {
-    const photo = data[picture.dataset.index];
-    bigPicture.classList.remove('hidden');
-    bigPicturePhoto.src = photo.url;
-    bigPicturePhoto.alt = photo.description;
-    likesCount.textContent = photo.likes;
-    commentsCount.textContent = photo.comments.length;
-    socialComments.innerHTML = '';
-    photo.comments.forEach((comment) => {
-      socialComments.insertAdjacentHTML('beforeend', `
-          <li class="social__comment">
-            <img
-                class="social__picture"
-                src="${comment.avatar}"
-                alt="${comment.name}"
-                width="35" height="35">
-            <p class="social__text">${comment.message}</p>
-          </li>
-        `);
-    });
-    socialCaption.textContent = photo.description;
-    socialCommentCount.classList.add('hidden');
-    commentsLoader.classList.add('hidden');
-    document.body.classList.add('modal-open');
 
-    document.addEventListener('keydown', onModalEscapeKeydown);
-  }
+const openModal = (evt, photos) => {
+  const photo = photos[evt.target.closest('.picture').dataset.index];
+  bigPicturePhoto.src = photo.url;
+  bigPicturePhoto.alt = photo.description;
+  likesCount.textContent = photo.likes;
+  commentsCount.textContent = photo.comments.length;
+  socialCaption.textContent = photo.description;
+  comments.initializeComments(photo.comments);
+  bigPicture.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  document.addEventListener('keydown', closeModal);
+  bigPictureCancel.addEventListener('click', closeModal);
 };
 
 const thumbnailClickHandler = (element) => {

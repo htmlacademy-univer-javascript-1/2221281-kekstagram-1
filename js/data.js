@@ -6,16 +6,9 @@ const MAX_HASHTAG_LENGTH = 20;
 const ALLOWED_SYMBOLS = /^#[A-Za-zА-Яа-яЁё0-9]{1,19}$/;
 const MAX_COMMENT_NUMBER = 5;
 
-const ErrorMessages = {
-  STARTS_WITH_HASH: 'Хэш-тег начинается с символа #',
-  NO_PROHIBITED_SYMBOLS: 'В хэш-теги используются запрещённые символы (пробелы, спецсимволы, символы пунктуации, эмодзи и т.д.',
-  MAX_HASH_LENGTH: `Максимальная длина одного хэш-тега ${MAX_HASHTAG_LENGTH} символов, включая решётку`,
-  NO_REPEAT: 'Хэш-теги не должны повторяться',
-  MAX_HASH_COUNT: `Максимальное количество хэш-тегов: ${MAX_HASHTAG_COUNT}.`,
-  HASH_SPACE: 'Хэш-теги разделяются пробелами',
-  MAX_COMM_LENGTH: `Максимальная длина комментария - ${MAX_COMMENT_LENGTH} символов.`,
-  EMPTY_HASHTAG: 'Хэш-тег не может быть пустым',
-};
+const SCALE_STEP = 25;
+const MIN_SCALE_VALUE = 25;
+const MAX_SCALE_VALUE = 100;
 
 const NAMES = [
   'Mike Wazowski',
@@ -71,4 +64,4 @@ const addPublication = () => {
 addPublication();
 
 export {arrayPublications, MAX_COMMENT_LENGTH, MAX_HASHTAG_COUNT,
-  MAX_HASHTAG_LENGTH, ErrorMessages, ALLOWED_SYMBOLS, MAX_COMMENT_NUMBER};
+  MAX_HASHTAG_LENGTH, ALLOWED_SYMBOLS, MAX_COMMENT_NUMBER, SCALE_STEP, MAX_SCALE_VALUE, MIN_SCALE_VALUE};

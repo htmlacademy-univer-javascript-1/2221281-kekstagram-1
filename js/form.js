@@ -1,166 +1,112 @@
-import {isEscapeKey, getLineLength} from './util.js';
-import {MAX_COMMENT_LENGTH, MAX_HASHTAG_COUNT, MAX_HASHTAG_LENGTH, ErrorMessages, ALLOWED_SYMBOLS} from './data.js';
+import { ALLOWED_SYMBOLS, MAX_HASHTAG_COUNT } from './data.js';
+import {isEscapeKey} from './util.js';
+import {smartSlider} from './slider.js';
+import {scaleImage} from './scaling.js';
 
-const uploadForm = document.querySelector('.img-upload__form');
-const photoLoader = document.querySelector('#upload-file');
-const photoEditor = document.querySelector('.img-upload__overlay');
-const closeEditorButton = document.querySelector('#upload-cancel');
-const submitButton = document.querySelector('.img-upload__submit');
-const fieldWrapper = document.querySelector('.img-upload__text');
-const hashtagText = uploadForm.querySelector('.text__hashtags');
-const descriptionText = uploadForm.querySelector('.text__description');
-
-const pristine = new Pristine(uploadForm, {
+const imgUploadForm = document.querySelector('.img-upload__form');
+const uploadFile = document.querySelector('#upload-file');
+const imgUploadOverlay = document.querySelector('.img-upload__overlay');
+const uploadCancel = document.querySelector('#upload-cancel');
+const textHashtags = document.querySelector('.text__hashtags');
+const textDescription = document.querySelector('.text__description');
+const pristine = new Pristine(imgUploadForm, {
   classTo: 'img-upload__field-wrapper',
   errorTextParent: 'img-upload__field-wrapper',
   errorTextClass: 'img-upload__error-text'
 });
 
-let errorMessage = '';
+const scaleControlSmaller = document.querySelector('.scale__control--smaller');
+const scaleControlBigger = document.querySelector('.scale__control--bigger');
+const scaleControlValue = document.querySelector('.scale__control--value');
+const imgPreview = document.querySelector('.img-upload__preview img');
+const effectsList = document.querySelector('.effects__list');
+const effectLevelValue = document.querySelector('.effect-level__value');
+const effectLevelSlider = document.querySelector('.effect-level__slider');
 
-const getErrorMessage = () => errorMessage;
+const smartSliderFilters = smartSlider('none', effectLevelSlider, effectLevelValue);
+const scaleUploadImage = scaleImage(scaleControlValue, imgPreview);
 
-const isUniqueHashtags = (hashtags) => {
-  for (let i = hashtags.length - 1; i >= 0; i--) {
-    if (hashtags.length === 1) {
-      return true;
-    }
-    for (let j = hashtags.length - 2; j >= 0; j--) {
-      if (hashtags[i] === hashtags[j]) {
-        return false;
-      }
-    }
-    hashtags.pop();
-  }
+const getHashtags = (value) => value.toLowerCase().trim().split(/\s+/);
+
+const applyChanges = (value) => {
+  imgPreview.classList.remove(`effects__preview--${smartSliderFilters.getCurrentFilter()}`);
+  smartSliderFilters.setCurrentFilter(value);
+  imgPreview.classList.add(`effects__preview--${smartSliderFilters.getCurrentFilter()}`);
+  effectLevelSlider.noUiSlider.updateOptions(smartSliderFilters.getOptions());
+  imgPreview.style.filter = smartSliderFilters.getStyles();
 };
 
-const isValidHashtag = (value) => {
-  errorMessage = '';
-  const inputHashtag = value.toLowerCase();
-  if (inputHashtag.length === 0) {
-    return true;
-  }
-  const hashtags = inputHashtag.split(/\s+/);
-  const hashtagsCopy = hashtags.slice();
-  if (hashtags.length === 0) {
-    return true;
-  }
+pristine.addValidator(textHashtags, (value) => {
+  if (value !== '') {
+    const hashTagsArray = getHashtags(value);
+    const hashTagsSet = new Set(hashTagsArray);
 
-  const errorCheckers = [
-    {
-      checker: hashtags.some((hash) => hash[0] !== '#'),
-      error: ErrorMessages.STARTS_WITH_HASH,
-    },
-    {
-      checker: hashtags.some((hash) => hash.length > MAX_HASHTAG_LENGTH),
-      error: ErrorMessages.MAX_HASH_LENGTH,
-    },
-    {
-      checker: hashtags.some((hash) => hash.indexOf('#', 1) >= 1),
-      error: ErrorMessages.HASH_SPACE,
-    },
-    {
-      checker: hashtags.length > MAX_HASHTAG_COUNT,
-      error: ErrorMessages.MAX_HASH_COUNT,
-    },
-    {
-      checker: hashtags.some((hash) => hash.length === 1),
-      error: ErrorMessages.EMPTY_HASHTAG,
-    },
-    {
-      checker: hashtags.some((hash) => !ALLOWED_SYMBOLS.test(hash)),
-      error: ErrorMessages.NO_PROHIBITED_SYMBOLS,
-    },
-    {
-      checker: !isUniqueHashtags(hashtagsCopy),
-      error: ErrorMessages.NO_REPEAT,
+    if (hashTagsSet.size !== hashTagsArray.length) {
+      return false;
     }
-  ];
-  return errorCheckers.every((check) => {
-    const isInvalid = check.checker;
-    if (isInvalid){
-      errorMessage = check.error;
-    }
-    return !isInvalid;
-  });
-};
+  }
+  return true;
+}, 'Хештеги регистронезависимы и не должны повторяться');
 
-const isValidComment = (value) => {
-  errorMessage = '';
-  const comment = value;
-  if (comment.length === 0) {
+pristine.addValidator(textHashtags, (value) => {
+  if (value !== '') {
+    const hashTagsArray = getHashtags(value);
+
+    if (hashTagsArray.length > MAX_HASHTAG_COUNT) {
+      return false;
+    }
+  }
+  return true;
+}, `Максимальное число хештегов - ${MAX_HASHTAG_COUNT}`);
+
+pristine.addValidator(textHashtags, (value) => {
+  if (value === '') {
     return true;
   }
 
-  const errorChecker = {
-    checker: !getLineLength(comment, MAX_COMMENT_LENGTH),
-    error: ErrorMessages.MAX_COMM_LENGTH,
-  };
-  const isInvalid = errorChecker.checker;
-  if (isInvalid) {
-    errorMessage = errorChecker.error;
+  const hashTagsArray = getHashtags(value);
+  return hashTagsArray.every((hashtag) => ALLOWED_SYMBOLS.test(hashtag));
+}, 'Один из введённых вами хештегов некорректен');
+
+const closeUploadForm = (evt) => {
+  if ((isEscapeKey(evt) && document.activeElement !== textHashtags && document.activeElement !== textDescription) || evt.type === 'click') {
+    imgUploadOverlay.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', closeUploadForm);
+    uploadCancel.removeEventListener('click', closeUploadForm);
+    imgUploadForm.reset();
   }
-  return !isInvalid;
 };
 
-const validateForm = () => {
-  pristine.addValidator(hashtagText, isValidHashtag, getErrorMessage);
-  pristine.addValidator(descriptionText, isValidComment, getErrorMessage);
-};
-
-const uploadPhoto = () => {
-  photoLoader.addEventListener('change', onUploadPhoto);
-  validateForm();
-};
-
-const closeEditor = () => {
-  document.body.classList.remove('modal-open');
-  photoEditor.classList.add('hidden');
-  photoLoader.value = '';
-  hashtagText.value = '';
-  closeEditorButton.removeEventListener('click', onCloseEditorButton);
-  window.removeEventListener('keydown', onEscapeKeydown);
-};
-
-const onSubmitButton = () => {
-  let isActive = true;
-  for (const elem of fieldWrapper.children) {
-    if (elem.classList.contains('has-danger')) {
-      isActive = false;
-    }
-  }
-  submitButton.disabled = !isActive;
-};
-
-const removeEscEvent = (field) => {
-  field.addEventListener('focus', () => {
-    window.removeEventListener('keydown', onEscapeKeydown);
-  });
-  field.addEventListener('blur', () => {
-    window.addEventListener('keydown', onEscapeKeydown);
-  });
-};
-
-function onUploadPhoto() {
+uploadFile.addEventListener('change', () => {
+  imgUploadOverlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
-  photoEditor.classList.remove('hidden');
-  hashtagText.addEventListener('input', onSubmitButton);
-  descriptionText.addEventListener('input', onSubmitButton);
-  closeEditorButton.addEventListener('click', onCloseEditorButton);
-  window.addEventListener('keydown', onEscapeKeydown);
-  removeEscEvent(hashtagText);
-  removeEscEvent(descriptionText);
-}
+  scaleUploadImage.initializeScale();
+  applyChanges('none');
+  document.addEventListener('keydown', closeUploadForm);
+  uploadCancel.addEventListener('click', closeUploadForm);
+});
 
-function onCloseEditorButton(evt) {
-  evt.preventDefault();
-  closeEditor();
-}
-
-function onEscapeKeydown(evt) {
-  if (isEscapeKey(evt)) {
-    closeEditor();
+imgUploadForm.addEventListener('submit', (evt) => {
+  if (!pristine.validate()) {
+    evt.preventDefault();
   }
-}
+});
 
-export {uploadPhoto};
+scaleControlSmaller.addEventListener('click', scaleUploadImage.decreaseValue);
+scaleControlBigger.addEventListener('click', scaleUploadImage.increaseValue);
+
+noUiSlider.create(effectLevelSlider, smartSliderFilters.getOptions());
+
+effectLevelSlider.noUiSlider.on('update', () => {
+  effectLevelValue.value = effectLevelSlider.noUiSlider.get();
+  imgPreview.style.filter = smartSliderFilters.getStyles();
+});
+
+effectsList.addEventListener('click', (evt) => {
+  const effectsItems = evt.target.closest('.effects__item');
+  if (effectsItems) {
+    const value = effectsItems.querySelector('.effects__radio').value;
+    applyChanges(value);
+  }
+});

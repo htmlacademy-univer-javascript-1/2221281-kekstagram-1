@@ -55,4 +55,4 @@ const thumbnailClickHandler = (element) => {
   });
 };
 
-export {thumbnailClickHandler};
+export {thumbnailClickHandler, closeModal};

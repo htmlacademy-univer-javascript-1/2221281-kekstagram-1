@@ -4,7 +4,14 @@ const pictures = document.querySelector('.pictures');
 const pictureTemplate = document.querySelector('#picture').content;
 const fragment = document.createDocumentFragment();
 
+const clearPictures = () => {
+  const pictureList = document.querySelectorAll('.picture');
+
+  pictureList.forEach((picture) => picture.remove());
+};
+
 const renderThumbnails = (element) => {
+  clearPictures();
   element.forEach((photo) => {
     const picture = pictureTemplate.cloneNode(true);
     picture.querySelector('.picture__img').src = photo.url;

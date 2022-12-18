@@ -32,8 +32,7 @@ function closeModal() {
 }
 
 
-const openModal = (evt, photos) => {
-  const photo = photos[evt.target.closest('.picture').dataset.index];
+const openModal = (photo) => {
   bigPicturePhoto.src = photo.url;
   bigPicturePhoto.alt = photo.description;
   likesCount.textContent = photo.likes;
@@ -47,8 +46,13 @@ const openModal = (evt, photos) => {
 };
 
 const thumbnailClickHandler = (element) => {
-  pictures.addEventListener('click', (evt) => openModal(evt, element));
-  bigPictureCancel.addEventListener('click', closeModal);
+  pictures.addEventListener('click', (evt) => {
+    const picture = evt.target.closest('.picture');
+
+    if (picture) {
+      openModal(element.find((photo) => photo.id === Number(picture.dataset.index)));
+    }
+  });
 };
 
 export {thumbnailClickHandler};

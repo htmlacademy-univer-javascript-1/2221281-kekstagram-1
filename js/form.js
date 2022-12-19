@@ -3,6 +3,8 @@ import {isEscapeKey} from './util.js';
 import {smartSlider} from './slider.js';
 import {scaleImage} from './scaling.js';
 import {sendData} from './api.js';
+import { showError } from './alerts.js';
+import { checkFileType } from './correctFile.js';
 
 const imgUploadForm = document.querySelector('.img-upload__form');
 const uploadFile = document.querySelector('#upload-file');
@@ -10,11 +12,6 @@ const imgUploadOverlay = document.querySelector('.img-upload__overlay');
 const uploadCancel = document.querySelector('#upload-cancel');
 const textHashtags = document.querySelector('.text__hashtags');
 const textDescription = document.querySelector('.text__description');
-const pristine = new Pristine(imgUploadForm, {
-  classTo: 'img-upload__field-wrapper',
-  errorTextParent: 'img-upload__field-wrapper',
-  errorTextClass: 'img-upload__error-text'
-});
 
 const scaleControlSmaller = document.querySelector('.scale__control--smaller');
 const scaleControlBigger = document.querySelector('.scale__control--bigger');
@@ -27,6 +24,12 @@ const effectLevelSlider = document.querySelector('.effect-level__slider');
 const smartSliderFilters = smartSlider('none', effectLevelSlider, effectLevelValue);
 const scaleUploadImage = scaleImage(scaleControlValue, imgPreview);
 const imgUploadSubmit = document.querySelector('.img-upload__submit');
+
+const pristine = new Pristine(imgUploadForm, {
+  classTo: 'img-upload__field-wrapper',
+  errorTextParent: 'img-upload__field-wrapper',
+  errorTextClass: 'img-upload__error-text'
+});
 
 const getHashtags = (value) => value.toLowerCase().trim().split(/\s+/);
 
@@ -85,13 +88,19 @@ const closeUploadForm = (evt = null, clear = true) => {
   }
 };
 
-uploadFile.addEventListener('change', () => {
-  imgUploadOverlay.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-  scaleUploadImage.initializeScale();
-  applyChanges('none');
-  document.addEventListener('keydown', closeUploadForm);
-  uploadCancel.addEventListener('click', closeUploadForm);
+uploadFile.addEventListener('change', (evt) => {
+  const file = evt.target.files[0];
+  const isCorrectFileType = checkFileType(file);
+
+  if (isCorrectFileType) {
+    imgPreview.src = URL.createObjectURL(file);
+    imgUploadOverlay.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    document.addEventListener('keydown', closeUploadForm);
+    uploadCancel.addEventListener('click', closeUploadForm);
+  } else {
+    showError();
+  }
 });
 
 const blockSubmitButton = () => {
@@ -115,13 +124,9 @@ const setUserFormSubmit = (onSuccess, onError) => {
         () => {
           onSuccess();
           unblockSubmitButton();
-
-          // scaleUploadImage.init();
-          // applyChanges('none');
         },
         () => {
           onError();
-          // showAlert('Не удалось отправить форму. Попробуйте ещё раз');
           unblockSubmitButton();
         },
         new FormData(imgUploadForm)
